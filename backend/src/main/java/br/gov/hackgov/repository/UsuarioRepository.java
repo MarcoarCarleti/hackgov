@@ -1,0 +1,13 @@
+package br.gov.hackgov.repository;
+
+import br.gov.hackgov.domain.Usuario;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+    Optional<Usuario> findByEmail(String email);
+    boolean existsByCpf(String cpf);
+    boolean existsByCartaoSus(String cartaoSus);
+    Optional<Usuario> findByCpf(String cpf);
+}
