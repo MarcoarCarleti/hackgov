@@ -14,7 +14,7 @@ const links = [
 ];
 
 export default function NotificacoesPage() {
-  const { session, ready } = useAuthGuard(["CIDADAO"]);
+  const { session, ready } = useAuthGuard(["PACIENTE"]);
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [erro, setErro] = useState("");
 
@@ -31,7 +31,7 @@ export default function NotificacoesPage() {
     <AppShell title="Notificações" session={session} links={links}>
       <section className="rounded-2xl bg-white p-6 shadow-sm">
         <h2 className="text-xl font-semibold">Histórico de lembretes</h2>
-        <p className="mt-2 text-slate-600">Mensagens automáticas 48h/24h antes da consulta.</p>
+        <p className="mt-2 text-slate-600">Mensagens automáticas 48h e 24h antes da consulta.</p>
 
         {erro && <p className="mt-4 text-sm text-rose-600">{erro}</p>}
 

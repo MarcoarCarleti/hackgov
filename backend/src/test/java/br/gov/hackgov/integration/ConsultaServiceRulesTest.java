@@ -1,8 +1,25 @@
 package br.gov.hackgov.integration;
 
-import br.gov.hackgov.domain.*;
+import br.gov.hackgov.domain.AgendaSlot;
+import br.gov.hackgov.domain.Consulta;
+import br.gov.hackgov.domain.ConsultaStatus;
+import br.gov.hackgov.domain.Especialidade;
+import br.gov.hackgov.domain.Feriado;
+import br.gov.hackgov.domain.FilaEspera;
+import br.gov.hackgov.domain.FilaEsperaStatus;
+import br.gov.hackgov.domain.Medico;
+import br.gov.hackgov.domain.Role;
+import br.gov.hackgov.domain.Ubs;
+import br.gov.hackgov.domain.Usuario;
 import br.gov.hackgov.exception.BusinessException;
-import br.gov.hackgov.repository.*;
+import br.gov.hackgov.repository.AgendaSlotRepository;
+import br.gov.hackgov.repository.ConsultaRepository;
+import br.gov.hackgov.repository.EspecialidadeRepository;
+import br.gov.hackgov.repository.FeriadoRepository;
+import br.gov.hackgov.repository.FilaEsperaRepository;
+import br.gov.hackgov.repository.MedicoRepository;
+import br.gov.hackgov.repository.UbsRepository;
+import br.gov.hackgov.repository.UsuarioRepository;
 import br.gov.hackgov.security.UserPrincipal;
 import br.gov.hackgov.service.ConsultaService;
 import br.gov.hackgov.web.dto.CancelarConsultaRequest;
@@ -22,7 +39,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -37,6 +57,8 @@ class ConsultaServiceRulesTest {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private MedicoRepository medicoRepository;
+    @Autowired
+    private EspecialidadeRepository especialidadeRepository;
     @Autowired
     private AgendaSlotRepository agendaSlotRepository;
     @Autowired
@@ -142,11 +164,18 @@ class ConsultaServiceRulesTest {
         ubs.setTelefone("11999999999");
         ubs = ubsRepository.save(ubs);
 
+        Especialidade especialidade = new Especialidade();
+        especialidade.setNome("Clínico Geral");
+        especialidade.setDescricao("Atendimento clínico");
+        especialidade.setAtivo(true);
+        especialidade = especialidadeRepository.save(especialidade);
+
         Medico medico = new Medico();
         medico.setNome("Dra. Teste");
-        medico.setEspecialidade("Clínico");
+        medico.setRegistroConselho("CRM-SP-9001");
         medico.setAtivo(true);
         medico.setUbs(ubs);
+        medico.adicionarEspecialidade(especialidade, true);
         medico = medicoRepository.save(medico);
 
         Usuario usuario1 = new Usuario();
@@ -156,7 +185,7 @@ class ConsultaServiceRulesTest {
         usuario1.setEmail("p1@test.com");
         usuario1.setTelefone("11999999999");
         usuario1.setSenhaHash(passwordEncoder.encode("123456"));
-        usuario1.setRole(Role.CIDADAO);
+        usuario1.setRole(Role.PACIENTE);
         usuario1.setUbsReferencia(ubs);
         usuario1 = usuarioRepository.save(usuario1);
 
@@ -167,13 +196,13 @@ class ConsultaServiceRulesTest {
         usuario2.setEmail("p2@test.com");
         usuario2.setTelefone("11999999998");
         usuario2.setSenhaHash(passwordEncoder.encode("123456"));
-        usuario2.setRole(Role.CIDADAO);
+        usuario2.setRole(Role.PACIENTE);
         usuario2.setUbsReferencia(ubs);
         usuario2 = usuarioRepository.save(usuario2);
 
         AgendaSlot slot = new AgendaSlot();
-        slot.setUbs(ubs);
         slot.setMedico(medico);
+        slot.setEspecialidade(especialidade);
         slot.setData(data);
         slot.setHoraInicio(hora);
         slot.setHoraFim(hora.plusMinutes(50));

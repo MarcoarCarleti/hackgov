@@ -5,6 +5,8 @@ import br.gov.hackgov.exception.NotFoundException;
 import br.gov.hackgov.web.dto.ApiError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,6 +28,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleBusiness(BusinessException ex) {
         ApiError error = new ApiError(OffsetDateTime.now(), 400, "BUSINESS_RULE", ex.getMessage(), List.of());
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    public ResponseEntity<ApiError> handleAccessDenied(Exception ex) {
+        ApiError error = new ApiError(OffsetDateTime.now(), 403, "FORBIDDEN", "Acesso negado", List.of());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -20,7 +20,7 @@ class GestorAuthorizationIntegrationTest {
     private MockMvc mockMvc;
 
     @Test
-    @WithMockUser(roles = "CIDADAO")
+    @WithMockUser(roles = "PACIENTE")
     void endpointGestorDeveNegarPerfilIncorreto() throws Exception {
         mockMvc.perform(get("/dashboard/resumo"))
                 .andExpect(status().isForbidden());

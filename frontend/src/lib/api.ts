@@ -10,6 +10,7 @@ export async function apiFetch<T>(
   const auth = options.auth ?? true;
   const headers = new Headers(options.headers ?? {});
   headers.set("Content-Type", "application/json");
+
   if (auth && session?.token) {
     headers.set("Authorization", `Bearer ${session.token}`);
   }

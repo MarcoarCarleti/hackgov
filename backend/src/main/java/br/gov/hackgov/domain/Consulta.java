@@ -11,7 +11,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "consultas")
+@Table(name = "agendamento")
 public class Consulta {
 
     @Id
@@ -19,42 +19,56 @@ public class Consulta {
     private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", nullable = false, foreignKey = @ForeignKey(name = "fk_agendamento_usuario"))
     private Usuario usuario;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "medico_id")
-    private Medico medico;
-
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "ubs_id")
-    private Ubs ubs;
-
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "agenda_slot_id")
+    @JoinColumn(name = "agenda_profissional_id", nullable = false, foreignKey = @ForeignKey(name = "fk_agendamento_agenda_profissional"))
     private AgendaSlot agendaSlot;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false, length = 30)
     private ConsultaStatus status;
 
-    @Column(nullable = false)
-    private LocalDate dataConsulta;
-
-    @Column(nullable = false)
-    private LocalTime horaConsulta;
-
+    @Column(name = "observacoes", length = 500)
     private String observacoes;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "criado_em", nullable = false, updatable = false)
     private OffsetDateTime criadoEm;
 
+    @Column(name = "cancelado_em")
     private OffsetDateTime canceladoEm;
 
+    @Column(name = "motivo_cancelamento", length = 255)
     private String motivoCancelamento;
 
-    @Column(nullable = false)
+    @Column(name = "encaixe_automatico", nullable = false)
     private boolean encaixeAutomatico = false;
+
+    @Transient
+    public Medico getMedico() {
+        return agendaSlot == null ? null : agendaSlot.getMedico();
+    }
+
+    @Transient
+    public Ubs getUbs() {
+        return agendaSlot == null ? null : agendaSlot.getUbs();
+    }
+
+    @Transient
+    public Especialidade getEspecialidade() {
+        return agendaSlot == null ? null : agendaSlot.getEspecialidade();
+    }
+
+    @Transient
+    public LocalDate getDataConsulta() {
+        return agendaSlot == null ? null : agendaSlot.getData();
+    }
+
+    @Transient
+    public LocalTime getHoraConsulta() {
+        return agendaSlot == null ? null : agendaSlot.getHoraInicio();
+    }
 
     @PrePersist
     public void onCreate() {

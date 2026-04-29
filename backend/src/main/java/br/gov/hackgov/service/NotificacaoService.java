@@ -1,6 +1,10 @@
 package br.gov.hackgov.service;
 
-import br.gov.hackgov.domain.*;
+import br.gov.hackgov.domain.Consulta;
+import br.gov.hackgov.domain.Notificacao;
+import br.gov.hackgov.domain.NotificacaoStatus;
+import br.gov.hackgov.domain.NotificacaoTipo;
+import br.gov.hackgov.domain.Usuario;
 import br.gov.hackgov.repository.ConsultaRepository;
 import br.gov.hackgov.repository.NotificacaoRepository;
 import br.gov.hackgov.web.dto.NotificacaoResponse;
@@ -28,9 +32,9 @@ public class NotificacaoService {
     private final AuditService auditService;
 
     public NotificacaoService(NotificacaoRepository notificacaoRepository,
-                             ConsultaRepository consultaRepository,
-                             UsuarioContextService usuarioContextService,
-                             AuditService auditService) {
+                              ConsultaRepository consultaRepository,
+                              UsuarioContextService usuarioContextService,
+                              AuditService auditService) {
         this.notificacaoRepository = notificacaoRepository;
         this.consultaRepository = consultaRepository;
         this.usuarioContextService = usuarioContextService;

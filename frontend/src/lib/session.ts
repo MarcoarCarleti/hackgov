@@ -1,4 +1,4 @@
-export type Role = "CIDADAO" | "GESTOR" | "ADMIN";
+export type Role = "PACIENTE" | "GESTOR" | "ADMIN";
 
 export type Session = {
   token: string;

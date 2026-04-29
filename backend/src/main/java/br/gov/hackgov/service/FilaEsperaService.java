@@ -43,7 +43,7 @@ public class FilaEsperaService {
         Usuario usuario = usuarioContextService.usuarioAtual();
 
         if (!usuario.getUbsReferencia().getId().equals(request.ubsId())) {
-            throw new BusinessException("A fila de espera deve ser da UBS de referência do cidadão");
+            throw new BusinessException("A fila de espera deve ser da UBS de referência do paciente");
         }
 
         Ubs ubs = ubsRepository.findById(request.ubsId())
@@ -52,9 +52,9 @@ public class FilaEsperaService {
         Medico medico = null;
         if (request.medicoId() != null) {
             medico = medicoRepository.findById(request.medicoId())
-                    .orElseThrow(() -> new NotFoundException("Médico não encontrado"));
+                    .orElseThrow(() -> new NotFoundException("Profissional não encontrado"));
             if (!medico.getUbs().getId().equals(ubs.getId())) {
-                throw new BusinessException("Médico não pertence à UBS informada");
+                throw new BusinessException("Profissional não pertence à UBS informada");
             }
         }
 
@@ -73,7 +73,9 @@ public class FilaEsperaService {
     public List<FilaEsperaResponse> minhasEntradas() {
         Usuario usuario = usuarioContextService.usuarioAtual();
         return filaEsperaRepository.findByUsuarioIdOrderByCreatedAtDesc(usuario.getId())
-                .stream().map(this::toResponse).toList();
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     public List<FilaEsperaResponse> listarTodas() {

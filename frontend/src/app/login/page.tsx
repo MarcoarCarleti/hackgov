@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const data = await apiFetch<{ token: string; usuarioId: number; nome: string; role: "CIDADAO" | "GESTOR" | "ADMIN" }>(
+      const data = await apiFetch<{ token: string; usuarioId: number; nome: string; role: "PACIENTE" | "GESTOR" | "ADMIN" }>(
         "/auth/login",
         {
           method: "POST",
@@ -29,7 +29,7 @@ export default function LoginPage() {
       );
 
       setSession(data);
-      if (data.role === "CIDADAO") {
+      if (data.role === "PACIENTE") {
         router.replace("/cidadao");
         return;
       }

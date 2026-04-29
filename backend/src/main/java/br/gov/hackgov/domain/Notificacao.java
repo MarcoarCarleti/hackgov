@@ -17,24 +17,24 @@ public class Notificacao {
     private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", nullable = false, foreignKey = @ForeignKey(name = "fk_notificacao_usuario"))
     private Usuario usuario;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "consulta_id")
+    @JoinColumn(name = "agendamento_id", nullable = false, foreignKey = @ForeignKey(name = "fk_notificacao_agendamento"))
     private Consulta consulta;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "tipo", nullable = false, length = 30)
     private NotificacaoTipo tipo;
 
-    @Column(nullable = false)
+    @Column(name = "data_envio", nullable = false)
     private OffsetDateTime dataEnvio;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false, length = 30)
     private NotificacaoStatus status;
 
-    @Column(nullable = false, length = 500)
+    @Column(name = "conteudo", nullable = false, length = 500)
     private String conteudo;
 }

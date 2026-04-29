@@ -39,7 +39,7 @@ public class CatalogoService {
                 .map(medico -> new MedicoResponse(
                         medico.getId(),
                         medico.getNome(),
-                        medico.getEspecialidade(),
+                        medico.getEspecialidadesDescricao(),
                         medico.getUbs().getId(),
                         medico.getUbs().getNome(),
                         medico.isAtivo()

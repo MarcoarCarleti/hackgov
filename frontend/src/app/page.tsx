@@ -12,7 +12,7 @@ export default function Home() {
     const session = getSession();
     if (!session) return;
 
-    if (session.role === "CIDADAO") {
+    if (session.role === "PACIENTE") {
       router.replace("/cidadao");
       return;
     }

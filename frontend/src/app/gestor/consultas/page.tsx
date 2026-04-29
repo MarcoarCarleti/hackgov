@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
-import { apiFetch } from "@/lib/api";
+import { atualizarStatusAgendamento, listarAgendamentos } from "@/lib/agendamentos";
 import { Consulta } from "@/lib/types";
 import { useAuthGuard } from "@/lib/useAuthGuard";
 
@@ -32,7 +32,7 @@ export default function GestorConsultasPage() {
 
   const carregar = useCallback(async () => {
     setErro("");
-    const data = await apiFetch<Consulta[]>("/consultas");
+    const data = await listarAgendamentos();
     setConsultas(data);
   }, []);
 
@@ -45,10 +45,7 @@ export default function GestorConsultasPage() {
     setErro("");
     setMsg("");
     try {
-      await apiFetch(`/consultas/${id}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }),
-      });
+      await atualizarStatusAgendamento(id, status);
       setMsg("Status atualizado com sucesso.");
       carregar();
     } catch (e) {
@@ -73,7 +70,7 @@ export default function GestorConsultasPage() {
               <tr className="border-b border-slate-200 text-left">
                 <th className="px-2 py-2">Data/Hora</th>
                 <th className="px-2 py-2">Paciente</th>
-                <th className="px-2 py-2">Médico</th>
+                <th className="px-2 py-2">Profissional</th>
                 <th className="px-2 py-2">UBS</th>
                 <th className="px-2 py-2">Status</th>
               </tr>

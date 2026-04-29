@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
+import { criarAgendamento } from "@/lib/agendamentos";
 import { apiFetch } from "@/lib/api";
 import { AgendaDisponivel } from "@/lib/types";
 import { useAuthGuard } from "@/lib/useAuthGuard";
@@ -15,7 +16,7 @@ const links = [
 ];
 
 export default function AgendaCidadaoPage() {
-  const { session, ready } = useAuthGuard(["CIDADAO"]);
+  const { session, ready } = useAuthGuard(["PACIENTE"]);
   const [agenda, setAgenda] = useState<AgendaDisponivel[]>([]);
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
@@ -39,10 +40,7 @@ export default function AgendaCidadaoPage() {
     setErro("");
     setMensagem("");
     try {
-      await apiFetch("/consultas", {
-        method: "POST",
-        body: JSON.stringify({ agendaSlotId: slotId }),
-      });
+      await criarAgendamento(slotId);
       setMensagem("Consulta agendada com sucesso.");
       carregarAgenda();
     } catch (e) {

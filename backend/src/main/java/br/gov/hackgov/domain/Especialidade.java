@@ -5,31 +5,32 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "ubs")
-public class Ubs {
+@Table(name = "especialidade", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_especialidade_nome", columnNames = "nome")
+})
+public class Especialidade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nome", nullable = false, length = 150)
+    @Column(name = "nome", nullable = false, length = 100)
     private String nome;
 
-    @Column(name = "endereco", nullable = false, length = 200)
-    private String endereco;
+    @Column(name = "descricao", length = 255)
+    private String descricao;
 
-    @Column(name = "cidade", nullable = false, length = 100)
-    private String cidade;
+    @Column(name = "ativo", nullable = false)
+    private boolean ativo = true;
 
-    @Column(name = "estado", nullable = false, length = 2)
-    private String estado;
-
-    @Column(name = "telefone", nullable = false, length = 20)
-    private String telefone;
+    @OneToMany(mappedBy = "especialidade")
+    private Set<ProfissionalEspecialidade> profissionais = new LinkedHashSet<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

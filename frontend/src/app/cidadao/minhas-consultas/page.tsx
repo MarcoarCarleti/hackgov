@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
-import { apiFetch } from "@/lib/api";
+import { cancelarAgendamento, listarMeusAgendamentos } from "@/lib/agendamentos";
 import { Consulta } from "@/lib/types";
 import { useAuthGuard } from "@/lib/useAuthGuard";
 
@@ -15,14 +15,14 @@ const links = [
 ];
 
 export default function MinhasConsultasPage() {
-  const { session, ready } = useAuthGuard(["CIDADAO"]);
+  const { session, ready } = useAuthGuard(["PACIENTE"]);
   const [consultas, setConsultas] = useState<Consulta[]>([]);
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
 
   const carregarConsultas = useCallback(async () => {
     try {
-      const data = await apiFetch<Consulta[]>("/me/consultas");
+      const data = await listarMeusAgendamentos();
       setConsultas(data);
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao carregar consultas");
@@ -41,10 +41,7 @@ export default function MinhasConsultasPage() {
     setErro("");
     setMensagem("");
     try {
-      await apiFetch(`/consultas/${consulta.id}/cancelar`, {
-        method: "POST",
-        body: JSON.stringify({ motivo: "Cancelamento solicitado pelo cidadão" }),
-      });
+      await cancelarAgendamento(consulta.id, "Cancelamento solicitado pelo paciente");
       setMensagem("Consulta cancelada e vaga liberada com sucesso.");
       carregarConsultas();
     } catch (e) {
@@ -69,7 +66,9 @@ export default function MinhasConsultasPage() {
           {consultas.length === 0 && <p className="text-slate-600">Nenhuma consulta encontrada.</p>}
           {consultas.map((consulta) => {
             const horario = new Date(`${consulta.dataConsulta}T${consulta.horaConsulta}`);
-            const podeCancelar = ["AGENDADA", "ENCAIXADA"].includes(consulta.status) && horario.getTime() - agora.getTime() >= 12 * 60 * 60 * 1000;
+            const podeCancelar =
+              ["AGENDADA", "ENCAIXADA"].includes(consulta.status) &&
+              horario.getTime() - agora.getTime() >= 12 * 60 * 60 * 1000;
 
             return (
               <div key={consulta.id} className="rounded-xl border border-slate-200 p-4">

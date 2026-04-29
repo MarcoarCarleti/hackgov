@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSession, Session, Role } from "./session";
+import { getSession, Role, Session } from "./session";
 
 export function useAuthGuard(allowedRoles?: Role[]) {
   const router = useRouter();
@@ -16,7 +16,7 @@ export function useAuthGuard(allowedRoles?: Role[]) {
     }
 
     if (allowedRoles && !allowedRoles.includes(session.role)) {
-      if (session.role === "CIDADAO") router.replace("/cidadao");
+      if (session.role === "PACIENTE") router.replace("/cidadao");
       else router.replace("/gestor/dashboard");
     }
   }, [allowedRoles, router, session]);

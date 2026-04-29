@@ -1,9 +1,17 @@
 package br.gov.hackgov.service;
 
-import br.gov.hackgov.domain.*;
+import br.gov.hackgov.domain.AgendaSlot;
+import br.gov.hackgov.domain.Consulta;
+import br.gov.hackgov.domain.ConsultaStatus;
+import br.gov.hackgov.domain.FilaEspera;
+import br.gov.hackgov.domain.FilaEsperaStatus;
+import br.gov.hackgov.domain.Usuario;
 import br.gov.hackgov.exception.BusinessException;
 import br.gov.hackgov.exception.NotFoundException;
-import br.gov.hackgov.repository.*;
+import br.gov.hackgov.repository.AgendaSlotRepository;
+import br.gov.hackgov.repository.ConsultaRepository;
+import br.gov.hackgov.repository.FeriadoRepository;
+import br.gov.hackgov.repository.FilaEsperaRepository;
 import br.gov.hackgov.web.dto.AtualizarStatusConsultaRequest;
 import br.gov.hackgov.web.dto.CancelarConsultaRequest;
 import br.gov.hackgov.web.dto.ConsultaResponse;
@@ -13,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -21,7 +28,11 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ConsultaService {
 
-    private static final List<ConsultaStatus> STATUS_ATIVOS = List.of(ConsultaStatus.AGENDADA, ConsultaStatus.ENCAIXADA, ConsultaStatus.REAGENDADA);
+    private static final List<ConsultaStatus> STATUS_ATIVOS = List.of(
+            ConsultaStatus.AGENDADA,
+            ConsultaStatus.ENCAIXADA,
+            ConsultaStatus.REAGENDADA
+    );
 
     private final ConsultaRepository consultaRepository;
     private final AgendaSlotRepository agendaSlotRepository;
@@ -48,33 +59,36 @@ public class ConsultaService {
     public ConsultaResponse criar(CriarConsultaRequest request) {
         Usuario usuario = usuarioContextService.usuarioAtual();
         AgendaSlot slot = agendaSlotRepository.findById(request.agendaSlotId())
-                .orElseThrow(() -> new NotFoundException("Slot não encontrado"));
+                .orElseThrow(() -> new NotFoundException("Agenda profissional não encontrada"));
 
         validarRegrasAgendamento(usuario, slot);
 
         Consulta consulta = new Consulta();
         consulta.setUsuario(usuario);
-        consulta.setMedico(slot.getMedico());
-        consulta.setUbs(slot.getUbs());
         consulta.setAgendaSlot(slot);
         consulta.setStatus(ConsultaStatus.AGENDADA);
-        consulta.setDataConsulta(slot.getData());
-        consulta.setHoraConsulta(slot.getHoraInicio());
         consulta.setObservacoes(request.observacoes());
         consulta = consultaRepository.save(consulta);
 
         slot.setDisponivel(false);
         agendaSlotRepository.save(slot);
 
-        auditService.registrar("CONSULTA", consulta.getId(), "CRIACAO", usuario.getId(),
-                "Consulta criada para " + consulta.getDataConsulta() + " " + consulta.getHoraConsulta());
+        auditService.registrar(
+                "CONSULTA",
+                consulta.getId(),
+                "CRIACAO",
+                usuario.getId(),
+                "Consulta criada para " + consulta.getDataConsulta() + " " + consulta.getHoraConsulta()
+        );
         return toResponse(consulta);
     }
 
     public List<ConsultaResponse> minhasConsultas() {
         Usuario usuario = usuarioContextService.usuarioAtual();
         return consultaRepository.findByUsuarioIdOrderByDataConsultaDescHoraConsultaDesc(usuario.getId())
-                .stream().map(this::toResponse).toList();
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Transactional
@@ -112,14 +126,20 @@ public class ConsultaService {
         }
 
         consultaRepository.save(consulta);
-        auditService.registrar("CONSULTA", consulta.getId(), "ALTERACAO_STATUS", usuarioResponsavelId,
-                "Status alterado para " + request.status());
+        auditService.registrar(
+                "CONSULTA",
+                consulta.getId(),
+                "ALTERACAO_STATUS",
+                usuarioResponsavelId,
+                "Status alterado para " + request.status()
+        );
         return toResponse(consulta);
     }
 
     @Transactional
     public void processarEncaixes() {
-        List<AgendaSlot> slotsDisponiveis = agendaSlotRepository.findByDisponivelTrueAndDataGreaterThanEqualOrderByDataAscHoraInicioAsc(LocalDate.now());
+        List<AgendaSlot> slotsDisponiveis =
+                agendaSlotRepository.findByDisponivelTrueAndDataGreaterThanEqualOrderByDataAscHoraInicioAsc(LocalDate.now());
         for (AgendaSlot slot : slotsDisponiveis) {
             tentarEncaixeAutomatico(slot, null);
         }
@@ -127,11 +147,12 @@ public class ConsultaService {
 
     private void validarRegrasAgendamento(Usuario usuario, AgendaSlot slot) {
         LocalDate hoje = LocalDate.now();
+
         if (!slot.isDisponivel()) {
             throw new BusinessException("Horário não está mais disponível");
         }
         if (!slot.getUbs().getId().equals(usuario.getUbsReferencia().getId())) {
-            throw new BusinessException("O cidadão só pode agendar na UBS de referência");
+            throw new BusinessException("O paciente só pode agendar na UBS de referência");
         }
         if (slot.getData().isBefore(hoje)) {
             throw new BusinessException("Não é permitido agendar em data passada");
@@ -140,7 +161,7 @@ public class ConsultaService {
             throw new BusinessException("Não é permitido agendar em feriados");
         }
 
-        boolean conflito = consultaRepository.existsByUsuarioIdAndDataConsultaAndHoraConsultaAndStatusIn(
+        boolean conflito = consultaRepository.existsByUsuarioIdAndAgendaSlotDataAndAgendaSlotHoraInicioAndStatusIn(
                 usuario.getId(),
                 slot.getData(),
                 slot.getHoraInicio(),
@@ -187,12 +208,13 @@ public class ConsultaService {
                         slot.getData(),
                         slot.getMedico().getId()
                 );
-        candidatos.addAll(filaEsperaRepository
-                .findByUbsIdAndStatusAndDataDesejadaLessThanEqualAndMedicoIsNullOrderByPrioridadeAscCreatedAtAsc(
+        candidatos.addAll(
+                filaEsperaRepository.findByUbsIdAndStatusAndDataDesejadaLessThanEqualAndMedicoIsNullOrderByPrioridadeAscCreatedAtAsc(
                         slot.getUbs().getId(),
                         FilaEsperaStatus.ATIVA,
                         slot.getData()
-                ));
+                )
+        );
 
         for (FilaEspera fila : candidatos) {
             boolean conflito = !consultaRepository.findConflitos(
@@ -207,12 +229,8 @@ public class ConsultaService {
 
             Consulta encaixe = new Consulta();
             encaixe.setUsuario(fila.getUsuario());
-            encaixe.setMedico(slot.getMedico());
-            encaixe.setUbs(slot.getUbs());
             encaixe.setAgendaSlot(slot);
             encaixe.setStatus(ConsultaStatus.ENCAIXADA);
-            encaixe.setDataConsulta(slot.getData());
-            encaixe.setHoraConsulta(slot.getHoraInicio());
             encaixe.setObservacoes("Encaixe automático por vaga liberada");
             encaixe.setEncaixeAutomatico(true);
             consultaRepository.save(encaixe);
@@ -223,8 +241,13 @@ public class ConsultaService {
             slot.setDisponivel(false);
             agendaSlotRepository.save(slot);
 
-            auditService.registrar("CONSULTA", encaixe.getId(), "ENCAIXE_AUTOMATICO", usuarioResponsavelId,
-                    "Encaixe automático processado para usuário " + fila.getUsuario().getId());
+            auditService.registrar(
+                    "CONSULTA",
+                    encaixe.getId(),
+                    "ENCAIXE_AUTOMATICO",
+                    usuarioResponsavelId,
+                    "Encaixe automático processado para usuário " + fila.getUsuario().getId()
+            );
             break;
         }
     }
@@ -236,7 +259,7 @@ public class ConsultaService {
                 consulta.getUsuario().getNome(),
                 consulta.getMedico().getId(),
                 consulta.getMedico().getNome(),
-                consulta.getMedico().getEspecialidade(),
+                consulta.getEspecialidade().getNome(),
                 consulta.getUbs().getId(),
                 consulta.getUbs().getNome(),
                 consulta.getAgendaSlot().getId(),

@@ -1,7 +1,7 @@
 package br.gov.hackgov.domain;
 
 public enum Role {
-    CIDADAO,
+    PACIENTE,
     GESTOR,
     ADMIN
 }

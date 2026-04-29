@@ -11,7 +11,10 @@ import br.gov.hackgov.security.JwtService;
 import br.gov.hackgov.security.UserPrincipal;
 import br.gov.hackgov.util.CpfValidator;
 import br.gov.hackgov.util.MaskingUtils;
-import br.gov.hackgov.web.dto.*;
+import br.gov.hackgov.web.dto.AuthResponse;
+import br.gov.hackgov.web.dto.LoginRequest;
+import br.gov.hackgov.web.dto.MeResponse;
+import br.gov.hackgov.web.dto.RegisterRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -71,11 +74,11 @@ public class AuthService {
         usuario.setEmail(request.email().toLowerCase());
         usuario.setTelefone(request.telefone());
         usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
-        usuario.setRole(Role.CIDADAO);
+        usuario.setRole(Role.PACIENTE);
         usuario.setUbsReferencia(ubs);
 
         usuario = usuarioRepository.save(usuario);
-        auditService.registrar("USUARIO", usuario.getId(), "CADASTRO", usuario.getId(), "Cadastro de cidadão");
+        auditService.registrar("USUARIO", usuario.getId(), "CADASTRO", usuario.getId(), "Cadastro de paciente");
 
         UserPrincipal principal = new UserPrincipal(usuario);
         return new AuthResponse(jwtService.generateToken(principal), usuario.getId(), usuario.getNome(), usuario.getRole());

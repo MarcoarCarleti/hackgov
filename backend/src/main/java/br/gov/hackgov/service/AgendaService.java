@@ -28,7 +28,7 @@ public class AgendaService {
         LocalDate fim = dataFinal == null ? inicio.plusDays(14) : dataFinal;
 
         List<AgendaSlot> slots = agendaSlotRepository
-                .findByUbsIdAndDataBetweenAndDisponivelTrueOrderByDataAscHoraInicioAsc(
+                .findByMedicoUbsIdAndDataBetweenAndDisponivelTrueOrderByDataAscHoraInicioAsc(
                         usuario.getUbsReferencia().getId(),
                         inicio,
                         fim
@@ -38,7 +38,7 @@ public class AgendaService {
                 slot.getId(),
                 slot.getMedico().getId(),
                 slot.getMedico().getNome(),
-                slot.getMedico().getEspecialidade(),
+                slot.getEspecialidade().getNome(),
                 slot.getUbs().getId(),
                 slot.getUbs().getNome(),
                 slot.getData(),

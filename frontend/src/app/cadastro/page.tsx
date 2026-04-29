@@ -44,7 +44,7 @@ export default function CadastroPage() {
 
     setLoading(true);
     try {
-      const data = await apiFetch<{ token: string; usuarioId: number; nome: string; role: "CIDADAO" }>("/auth/register", {
+      const data = await apiFetch<{ token: string; usuarioId: number; nome: string; role: "PACIENTE" }>("/auth/register", {
         method: "POST",
         auth: false,
         body: JSON.stringify({
@@ -71,7 +71,7 @@ export default function CadastroPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
       <div className="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-xl">
-        <h1 className="text-2xl font-bold">Cadastro do cidadão</h1>
+        <h1 className="text-2xl font-bold">Cadastro do paciente</h1>
         <p className="mt-2 text-sm text-slate-600">Informe CPF e Cartão SUS para criar seu acesso.</p>
 
         <form onSubmit={onSubmit} className="mt-6 grid gap-3 sm:grid-cols-2">
