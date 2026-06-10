@@ -19,6 +19,7 @@ const links = [
   { href: "/gestor/dashboard", label: "Dashboard" },
   { href: "/gestor/consultas", label: "Consultas" },
   { href: "/gestor/fila-espera", label: "Fila de espera" },
+  { href: "/gestor/arquivos", label: "Arquivos" },
   { href: "/gestor/medicos-agendas", label: "Médicos e UBS" },
 ];
 

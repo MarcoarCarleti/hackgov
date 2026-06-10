@@ -44,3 +44,6 @@ frontend/.vercel/
 # Generic build caches
 **/dist/
 **/.cache/
+
+# Added by code-review-graph
+.code-review-graph/
