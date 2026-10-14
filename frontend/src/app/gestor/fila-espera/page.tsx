@@ -17,6 +17,7 @@ type Fila = {
 
 const links = [
   { href: "/gestor/dashboard", label: "Dashboard" },
+  { href: "/gestor/risco-faltas", label: "Risco de faltas (IA)" },
   { href: "/gestor/consultas", label: "Consultas" },
   { href: "/gestor/fila-espera", label: "Fila de espera" },
   { href: "/gestor/arquivos", label: "Arquivos" },
